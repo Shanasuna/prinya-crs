@@ -245,13 +245,39 @@ class MainHandler(webapp2.RequestHandler):
             'credit_total' : credit_total,
 
     	}
-    	get_template = JINJA_ENVIRONMENT.get_template('course_regis.html')
+    	get_template = JINJA_ENVIRONMENT.get_template('add_event.html')
     	self.response.write(get_template.render(templates));
 
     	conn.close();
     	conn2.close();
     	conn3.close();
     	conn4.close();
+
+class AddEvent(webapp2.RequestHandler):
+	@decorator.oauth_aware
+	def post(self):
+		if decorator.has_credentials():
+			event = {
+  				'summary': '188371',
+  				'location': 'KKU',
+  				'start': {
+    					'dateTime': "2013-09-30T09:00:00.000+07:00",
+    					'timeZone': 'Asia/Bangkok'
+  				},
+  				'end': {
+    					'dateTime': "2013-09-30T12:00:00.000+07:00",
+    					'timeZone': 'Asia/Bangkok'
+  				},
+  				'recurrence': [
+    					'RRULE:FREQ=WEEKLY;UNTIL=20131010T170000Z'
+  				],
+			}
+			http = decorator.http()
+			request = service.events().insert(calendarId='primary', body=event)
+			inserted = request.execute(http=http)
+			self.response.write(json.dumps(inserted))
+		else:
+			self.response.write(json.dumps({'error':'No credentials'}))
 
 class SearchCourseHandler(webapp2.RequestHandler):
     def get(self):
@@ -1264,6 +1290,7 @@ class DeleteCalendar(webapp2.RequestHandler):
         
 app = webapp2.WSGIApplication([
     ('/', MainHandler),
+    ('/AddEvent', AddEvent),
     ('/SearchCourse', SearchCourseHandler), 
     ('/FollowingDetailCourse', DetailCourseFollowHandler),
     ('/Follow', FollowHandler),
