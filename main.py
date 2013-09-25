@@ -217,10 +217,6 @@ class MainHandler(webapp2.RequestHandler):
             if recurrence[row] != 0:
                 rec = str(recurrence[row])
                 x = list(str(recurrence[row]))
-                if x[28] == "'" :
-                    recurrence2.append(int(rec[27:-2]))
-                else:           
-                    recurrence2.append(int(rec[27:-2]))
             else:
                 recurrence2.append(int(1))
 
@@ -245,7 +241,7 @@ class MainHandler(webapp2.RequestHandler):
             'credit_total' : credit_total,
 
     	}
-    	get_template = JINJA_ENVIRONMENT.get_template('add_event.html')
+    	get_template = JINJA_ENVIRONMENT.get_template('course_regis.html')
     	self.response.write(get_template.render(templates));
 
     	conn.close();
@@ -269,7 +265,7 @@ class AddEvent(webapp2.RequestHandler):
     					'timeZone': 'Asia/Bangkok'
   				},
   				'recurrence': [
-    					'RRULE:FREQ=WEEKLY;UNTIL=20131010T170000Z'
+    					'RRULE:FREQ=WEEKLY;UNTIL=20131010T170000+07:00',
   				],
 			}
 			http = decorator.http()
