@@ -581,8 +581,8 @@ class DetailCourseFollowHandler(webapp2.RequestHandler):
 
     		conn2 = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
         	cursor2 = conn2.cursor()
-        	sql2="SELECT co.course_code FROM course co,prerequsite_course pre\
-            		WHERE prerequsite_id=co.course_id AND pre.course_id=\
+        	sql2="SELECT co.course_code FROM course co,prerequisite_course pre\
+            		WHERE prerequisite_id=co.course_id AND pre.course_id=\
             		(SELECT course_id FROM course WHERE course_code='%s')"%(course_code)
         	cursor2.execute(sql2);
         	pre_code=""
@@ -629,7 +629,7 @@ class DetailCourseFollowHandler(webapp2.RequestHandler):
 
     		templates = {
     			'course' : cursor.fetchall(),
-    			'prerequsite_code' : pre_code,
+    			'prerequisite_code' : pre_code,
     			'section' : cursor3.fetchall(),
             		'capacity' : capacity,
             		'credit' : credit,
@@ -663,7 +663,7 @@ class CourseEnrollHandler(webapp2.RequestHandler):
 
         	conn2 = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
         	cursor2 = conn2.cursor()
-        	sql2="SELECT co.course_code FROM course co,prerequsite_course pre\
+        	sql2="SELECT co.course_code FROM course co,prerequisite_course pre\
             		WHERE prerequisite_id=co.course_id AND pre.course_id=\
             		(SELECT course_id FROM course WHERE course_code='%s')"%(course_code)
         	cursor2.execute(sql2);
@@ -929,8 +929,8 @@ class DetailCourse(webapp2.RequestHandler):
 
         	conn2 = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
         	cursor2 = conn2.cursor()
-        	sql2="SELECT co.course_code FROM course co,prerequsite_course pre\
-            		WHERE prerequsite_id=co.course_id AND pre.course_id=\
+        	sql2="SELECT co.course_code FROM course co,prerequisite_course pre\
+            		WHERE prerequisite_id=co.course_id AND pre.course_id=\
             		(SELECT course_id FROM course WHERE course_code='%s')"%(course_id)
         	cursor2.execute(sql2);
         	pre_code=""
