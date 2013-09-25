@@ -26,6 +26,8 @@ import json
 from oauth2client.appengine import OAuth2Decorator
 from apiclient.http import MediaFileUpload
 import datetime
+from gaesessions import get_current_session
+from gaesessions import SessionMiddleware
 
 _CLIENT_ID = "380068443772.apps.googleusercontent.com"
 _CLIENT_SECRET = "CnXNI8-u2QgJXpUs1BrBnmPP"
@@ -91,7 +93,7 @@ class Core():
 				session['university_id'] = row[0][0]
 				session['super'] = row[0][1]
 
-			cursor.execute("SELECT staff_id, firstname, lastname FROM staff WHERE email='%s' AND university_id='%s' LIMIT 1"%(email, session['university_id']))
+			cursor.execute("SELECT student_id, firstname, lastname FROM student WHERE email='%s' AND university_id='%s' LIMIT 1"%(email, session['university_id']))
 			row = cursor.fetchall()
 			if len(row)==0:
 				self.redirect('/InvalidLogin')
@@ -100,7 +102,7 @@ class Core():
 				Core.FIRSTNAME = row[0][1]
 				Core.LASTNAME = row[0][2]
 				Core.IS_LOGIN = 1
-				session['staff_id'] = row[0][0]
+				session['student_id'] = row[0][0]
 				session['firstname'] = row[0][1]
 				session['lastname'] = row[0][2]
 				session['is_login'] = 1
@@ -204,53 +206,53 @@ class MainHandler(webapp2.RequestHandler):
 	        for event in events['items']:
 	            	if 'date' in event['start']:
 	                	dateTime = event['start']['date']       
-	                if 'recurrence' in event:
-	                    	rec = event['recurrence']
-	                    	recurrence.append(rec)
-	                    	year.append(dateTime[:4])
-	                    	month.append(dateTime[5:-3])
-	                    	date.append(dateTime[8:])      
-	                    	start_time_hour.append(00)
-	                    	start_time_minute.append(00)
-	                    	end_time_hour.append(00)
-	                    	end_time_minute.append(00)
-	                    	allday_time.append(1) 
-	                    	if 'location' in event:
-	                        	loca = event['location']
-	                        	location.append(loca)
-	                        	if 'summary' in event:   
-	                            		title.append(event['summary'])
-	                        	else:
-	                           		title.append(" ")
-	                    	else:
-	                        	location.append(" ")
-	                        	if 'summary' in event:   
-	                            		title.append(event['summary'])
-	                        	else:
-	                            		title.append(" ")
-	                else:
-	                    	recurrence.append(0)
-	                    	year.append(dateTime[:4])
-	                    	month.append(dateTime[5:-3])
-	                    	date.append(dateTime[8:])          
-	                    	start_time_hour.append(00)
-	                    	start_time_minute.append(00)
-	                    	end_time_hour.append(00)
-	                    	end_time_minute.append(00)
-	                    	allday_time.append(1)       
-	                    	if 'location' in event:
-	                        	loca = event['location']
-	                        	location.append(loca)
-	                        	if 'summary' in event:   
-	                            		title.append(event['summary'])
-	                        	else:
-	                            		title.append(" ")
-	                    	else:
-	                        	location.append(" ")
-	                        	if 'summary' in event:   
-	                            		title.append(event['summary'])
-	                        	else:
-	                            		title.append(" ")
+	                	if 'recurrence' in event:
+	                    		rec = event['recurrence']
+	                    		recurrence.append(rec)
+	                    		year.append(dateTime[:4])
+	                    		month.append(dateTime[5:-3])
+	                    		date.append(dateTime[8:])      
+	                    		start_time_hour.append(00)
+	                    		start_time_minute.append(00)
+	                    		end_time_hour.append(00)
+	                    		end_time_minute.append(00)
+	                    		allday_time.append(1) 
+	                    		if 'location' in event:
+	                        		loca = event['location']
+	                        		location.append(loca)
+	                        		if 'summary' in event:   
+	                            			title.append(event['summary'])
+	                        		else:
+	                           			title.append(" ")
+	                    		else:
+	                        		location.append(" ")
+	                        		if 'summary' in event:   
+	                            			title.append(event['summary'])
+	                        		else:
+	                            			title.append(" ")
+	                	else:
+	                    		recurrence.append(0)
+	                    		year.append(dateTime[:4])
+	                    		month.append(dateTime[5:-3])
+	                    		date.append(dateTime[8:])          
+	                    		start_time_hour.append(00)
+	                    		start_time_minute.append(00)
+	                    		end_time_hour.append(00)
+	                    		end_time_minute.append(00)
+	                    		allday_time.append(1)       
+	                    		if 'location' in event:
+	                        		loca = event['location']
+	                        		location.append(loca)
+	                        		if 'summary' in event:   
+	                            			title.append(event['summary'])
+	                        		else:
+	                            			title.append(" ")
+	                    		else:
+	                        		location.append(" ")
+	                        		if 'summary' in event:   
+	                            			title.append(event['summary'])
+	                        		else:
+	                            			title.append(" ")
 	            	else:
 	                	dateTime = event['start']['dateTime']
 	                	dateTime2 = event['end']['dateTime']
@@ -304,16 +306,16 @@ class MainHandler(webapp2.RequestHandler):
 
 	        len_event = len(year)
 
-	        for row in range(0,len(recurrence)):
-	            	if recurrence[row] != 0:
-	                	rec = str(recurrence[row])
-	                	x = list(str(recurrence[row]))
-	                	if x[28] == "'" :
-	                    		recurrence2.append(int(rec[27:-2]))
-	                	else:           
-	                    		recurrence2.append(int(rec[27:-2]))
-	            	else:
-	                	recurrence2.append(int(1))
+	        # for row in range(0,len(recurrence)):
+	        #     	if recurrence[row] != 0:
+	        #         	rec = str(recurrence[row])
+	        #         	x = list(str(recurrence[row]))
+	        #         	if x[28] == "'" :
+	        #             		recurrence2.append(int(rec[27:-2]))
+	        #         	else:           
+	        #             		recurrence2.append(int(rec[27:-2]))
+	        #     	else:
+	        #         	recurrence2.append(int(1))
 
 
 	        templates = {
@@ -335,7 +337,7 @@ class MainHandler(webapp2.RequestHandler):
 	            	'credit_enroll' : credit_enroll,
 	            	'credit_total' : credit_total,
 	    	}
-	    	get_template = JINJA_ENVIRONMENT.get_template('add_event.html')
+	    	get_template = JINJA_ENVIRONMENT.get_template('course_regis.html')
 	    	self.response.write(get_template.render(templates));
 
 	    	conn.close();
@@ -371,6 +373,9 @@ class AddEvent(webapp2.RequestHandler):
 
 class SearchCourseHandler(webapp2.RequestHandler):
     	def get(self):
+
+		Core.login(self)
+		session = get_current_session()
         
         	student_id=self.request.get('student_id');
         	student_id=int(student_id)
@@ -378,7 +383,11 @@ class SearchCourseHandler(webapp2.RequestHandler):
         	conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
         	cursor = conn.cursor()
         	sql="SELECT department_name from department"
-        	cursor.execute(sql);
+        	cursor.execute(sql)
+		department = cursor.fetchall()
+
+		cursor.execute("SELECT * from course WHERE university_id='%s'"%(str(session['university_id'])))
+		course = cursor.fetchall()
 
         	conn2 = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
         	cursor2 = conn2.cursor()
@@ -387,8 +396,9 @@ class SearchCourseHandler(webapp2.RequestHandler):
 
         	templates = {
             		'student_id' : student_id,
-            		'department' : cursor.fetchall(),
+            		'department' : department,
             		'faculty' : cursor2.fetchall(),
+			'course' : course
             	}
 
         	template = JINJA_ENVIRONMENT.get_template('course_active.html')
@@ -654,7 +664,7 @@ class CourseEnrollHandler(webapp2.RequestHandler):
         	conn2 = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
         	cursor2 = conn2.cursor()
         	sql2="SELECT co.course_code FROM course co,prerequsite_course pre\
-            		WHERE prerequsite_id=co.course_id AND pre.course_id=\
+            		WHERE prerequisite_id=co.course_id AND pre.course_id=\
             		(SELECT course_id FROM course WHERE course_code='%s')"%(course_code)
         	cursor2.execute(sql2);
         	pre_code=""
@@ -1354,3 +1364,4 @@ app = webapp2.WSGIApplication([
     	('/DeleteCalendar', DeleteCalendar),
     	(decorator.callback_path,decorator.callback_handler()),
 ], debug=True)
+app = SessionMiddleware(app, cookie_key=str(os.urandom(64)))
